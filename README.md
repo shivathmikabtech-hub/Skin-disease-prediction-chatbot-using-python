@@ -1,106 +1,266 @@
-import pandas as pd
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-import nltk
-import re
+# 🩺 Skin Disease Prediction Chatbot
 
-nltk.download('punkt', quiet=True)
-nltk.download('stopwords', quiet=True)
-nltk.download('wordnet', quiet=True)
+An AI-powered **Skin Disease Prediction Chatbot** built using **Natural Language Processing (NLP)** and **Machine Learning**.
+The chatbot analyzes user-provided skin symptoms and predicts possible skin diseases using a **Naive Bayes Classification Model**.
 
-try:
-    df = pd.read_csv('Symptoms-Disease.csv')
-except FileNotFoundError:
-    print("Error: '.csv' not found. Please upload the dataset or provide the correct path.")
-    df = pd.read_csv('/content/Symptoms-Disease.csv')
-    print("Using sample dataset as fallback.")
+---
 
-# NLP Preprocessing
-lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
+## 📌 Project Overview
 
-def preprocess_text(text):
-    """Clean and preprocess text"""
-    text = text.lower()
-    text = re.sub(r'[^a-zA-Z\s]', '', text)
-    tokens = word_tokenize(text)
-    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words and len(word) > 2]
-    return ' '.join(tokens)
+This project uses:
 
-if 'Symptoms' in df.columns:
-    df['processed_symptoms'] = df['Symptoms'].apply(preprocess_text)
-else:
-    print("Error: 'symptoms' column not found in the dataset.")
+* **NLP preprocessing**
+* **TF-IDF Vectorization**
+* **Multinomial Naive Bayes**
+* **Interactive chatbot system**
 
-if 'processed_symptoms' in df.columns:
-    vectorizer = TfidfVectorizer(max_features=100)
-    X = vectorizer.fit_transform(df['processed_symptoms'])
-    
-    if 'Disease' in df.columns:
-        y = df['Disease']
-        model = MultinomialNB()
-        model.fit(X, y)
+to predict skin diseases from user-entered symptoms.
 
-        def get_prediction(user_input):
-            """Predict disease from user input"""
-            processed_input = preprocess_text(user_input)
-            input_vector = vectorizer.transform([processed_input])
-            prediction = model.predict(input_vector)[0]
-            confidence = model.predict_proba(input_vector)[0].max()
-            return prediction, confidence
+The chatbot accepts symptom descriptions in natural language and provides:
 
-        def chatbot():
-            """Run the chatbot"""
-            print("=" * 50)
-            print("🩺 SKIN DISEASE PREDICTION CHATBOT")
-            print("=" * 50)
-            print("\nWelcome! Tell me about your skin symptoms.")
-            # print("(Type 'quit' to exit)\n")
+* Predicted disease
+* Confidence score
+* Follow-up interaction support
 
-            while True:
-                user_input = input("You: \n").strip()
+---
 
-                if user_input.lower() in ['quit', 'bye', 'exit', 'no', 'thanks','ok']:
-                    print("\n✋ Thank you for using our chatbot!")
-                    print("⚠️ Remember to consult a dermatologist for proper diagnosis.")
-                    print("Stay healthy! 💙\n")
-                    break
+## 🚀 Features
 
-                if not user_input:
-                    print("Bot: Please describe your symptoms.\n")
-                    continue
+✔ Symptom-based disease prediction
+✔ NLP text preprocessing
+✔ Stopword removal & lemmatization
+✔ TF-IDF feature extraction
+✔ Naive Bayes classification
+✔ Confidence score prediction
+✔ Interactive chatbot conversation
+✔ Follow-up symptom checking
 
-                disease, confidence = get_prediction(user_input)
+---
 
-                print(f"\nBot: Based on your symptoms, you might have: **{disease}**")
-                print(f"Confidence: {confidence * 100:.2f}%")
-                print("⚠️ Please consult a dermatologist for proper diagnosis.\n")
+# 🛠 Technologies Used
 
-                while True:
-                    follow_up = input("Bot: Do you have any other symptoms or questions about this prediction? (yes/no): \n").strip().lower()
-                    if follow_up in ['yes', 'yehh']:
-                        more_symptoms = input("Bot: Please tell me more about your other symptoms or questions: \n").strip()
-                        if more_symptoms:
-                            disease, confidence = get_prediction(more_symptoms)
-                            print(f"\nBot: Based on the additional information, you might have: **{disease}**")
-                            print(f"Confidence: {confidence * 100:.2f}%")
-                            print("⚠️ Please consult a dermatologist for proper diagnosis.\n")
-                            break
-                        else:
-                            print("Bot: Please provide some additional information.\n")
-                    elif follow_up in ['no', 'na']:
-                        print("Bot: Alright. Remember to consult a dermatologist for proper diagnosis.\n")
-                        break
-                    else:
-                        print("Bot: Please answer with 'yes' or 'no'.\n")
+* Python
+* Pandas
+* Scikit-learn
+* NLTK
+* TF-IDF Vectorizer
+* Multinomial Naive Bayes
 
+---
 
-        if __name__ == "__main__":
-            chatbot()
-    else:
-        print("Error: 'disease' column not found in the dataset.")
-else:
-    print("Error: 'processed_symptoms' column not found in the dataset after preprocessing.")
+# 📂 Dataset
+
+Dataset used:
+`Symptoms-Disease.csv`
+
+Dataset contains:
+
+* **Symptoms** → Input text
+* **Disease** → Target label
+
+Example:
+
+| Symptoms                    | Disease  |
+| --------------------------- | -------- |
+| itching, skin rash, redness | Eczema   |
+| pimples, oily skin          | Acne     |
+| white patches on skin       | Vitiligo |
+
+---
+
+# ⚙️ Working Process
+
+## 1️⃣ Data Loading
+
+The dataset is loaded using Pandas.
+
+```python
+df = pd.read_csv('Symptoms-Disease.csv')
+```
+
+---
+
+## 2️⃣ Text Preprocessing
+
+Symptoms are cleaned using NLP techniques:
+
+* Lowercasing
+* Removing special characters
+* Tokenization
+* Stopword removal
+* Lemmatization
+
+Example:
+
+Input:
+
+```text
+Red itchy skin with rashes
+```
+
+Processed:
+
+```text
+red itchy skin rash
+```
+
+---
+
+## 3️⃣ Feature Extraction
+
+TF-IDF converts text into numerical vectors.
+
+```python
+vectorizer = TfidfVectorizer(max_features=100)
+```
+
+---
+
+## 4️⃣ Model Training
+
+A Multinomial Naive Bayes model is trained.
+
+```python
+model = MultinomialNB()
+model.fit(X, y)
+```
+
+---
+
+## 5️⃣ Prediction System
+
+The chatbot predicts diseases from user symptoms.
+
+Example:
+
+```text
+You: I have itchy red skin and rashes
+
+Bot: Based on your symptoms, you might have: Eczema
+Confidence: 92.45%
+```
+
+---
+
+# 💬 Chatbot Flow
+
+```text
+User Input
+     ↓
+Text Preprocessing
+     ↓
+TF-IDF Vectorization
+     ↓
+Naive Bayes Prediction
+     ↓
+Disease + Confidence Output
+```
+
+---
+
+# 📸 Sample Output
+
+```text
+==================================================
+🩺 SKIN DISEASE PREDICTION CHATBOT
+==================================================
+
+Welcome! Tell me about your skin symptoms.
+
+You:
+I have red itchy skin and dry patches
+
+Bot:
+Based on your symptoms, you might have: Eczema
+Confidence: 91.23%
+
+⚠️ Please consult a dermatologist for proper diagnosis.
+```
+
+---
+
+# 📊 Machine Learning Model
+
+## Algorithm Used:
+
+### Multinomial Naive Bayes
+
+Why Naive Bayes?
+
+* Works well for text classification
+* Fast and efficient
+* Good accuracy for symptom prediction
+* Handles sparse TF-IDF vectors effectively
+
+---
+
+# 🧠 NLP Techniques Used
+
+* Tokenization
+* Stopword Removal
+* Lemmatization
+* Text Cleaning
+* TF-IDF Feature Engineering
+
+---
+
+# 📁 Project Structure
+
+```text
+Skin-Disease-Prediction-Chatbot/
+│
+├── Symptoms-Disease.csv
+├── chatbot.py
+├── README.md
+└── requirements.txt
+```
+
+---
+
+# ▶️ How to Run the Project
+
+## 1️⃣ Install Dependencies
+
+```bash
+pip install pandas scikit-learn nltk
+```
+
+---
+
+## 2️⃣ Run the Python File
+
+```bash
+python chatbot.py
+```
+
+---
+
+# 📌 Future Improvements
+
+* Add Deep Learning models
+* Use larger medical datasets
+* Deploy using Streamlit/Flask
+* Add multilingual support
+* Add image-based skin disease detection
+* Improve chatbot conversation flow
+
+---
+
+# ⚠️ Disclaimer
+
+This chatbot is only for educational and research purposes.
+It should not replace professional medical advice or diagnosis.
+
+Always consult a dermatologist or healthcare professional.
+
+---
+
+# 👨‍💻 Author
+
+Developed as an AI/ML project using NLP and Machine Learning techniques.
+
+---
+
+# ⭐ If You Like This Project
+
+Give this repository a ⭐ on GitHub!
